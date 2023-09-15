@@ -1,6 +1,11 @@
-import { NS } from "@ns";
+import { NS } from "@ns"
 import { hash, hashFilename } from "lib/hash"
 import { Player } from "lib/player"
+
+export interface SerializedServer {
+    name: string;
+    children: SerializedServer[];
+}
 
 /**
  * Represents a server.
@@ -36,11 +41,11 @@ export class Server {
      * @return A list of all child servers.
      */
     all(includeSelf: boolean = false): Server[] {
-        let servers: Server[] = includeSelf ? [this] : [];
+        let servers: Server[] = includeSelf ? [this] : []
         for (const child of this.children) {
-            servers.push(...child.all(true));
+            servers.push(...child.all(true))
         }
-        return servers;
+        return servers
     }
 
     /**
@@ -116,6 +121,7 @@ export class Server {
     getRoot(player: Player) {
         const exploits = player.getActiveExploits()
         const requiredPorts = this.ns.getServerNumPortsRequired(this.name)
+        this.ns.print(`INFO Using ${exploits.length} exploits to root ${this.name} (need ${requiredPorts} ports)`)
 
         for (let i = 0; i < requiredPorts; i++) {
             exploits[i](this.name)
@@ -178,6 +184,17 @@ export class Server {
     }
 
     /**
+     * Returns a JSON representation of this server.
+     * @returns A JSON representation of this server.
+     */
+    toJSON(): object {
+        return {
+            name: this.name,
+            children: this.children.map(child => child.toJSON()),
+        }
+    }
+
+    /**
      * Uploads the given file to the server.
      * @param filename The file to upload
      * @param withHash If true, will also upload a hash of the file
@@ -193,5 +210,17 @@ export class Server {
         }
 
         this.ns.scp(files, this.name, 'home')
+    }
+
+    /**
+     * Parses the given JSON data into a Server object.
+     * @param data The raw JSON data
+     * @param ns The NetScript object
+     * @returns The parsed Server object
+     */
+    static fromJSON(data: SerializedServer, ns: NS): Server {
+        const server = new Server(ns, data.name)
+        server.children = data.children.map(childData => Server.fromJSON(childData, ns))
+        return server
     }
 }

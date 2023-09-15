@@ -1,6 +1,6 @@
 import { NS } from "@ns";
 import { Player } from "lib/player"
-import { scanAllServers } from "lib/scan";
+import { Cluster } from "lib/cluster";
 
 /**
  * Main entrypoint
@@ -8,26 +8,15 @@ import { scanAllServers } from "lib/scan";
 export async function main(ns: NS): Promise<void> {
     const pwnScript = "pwn.js"
     const player = new Player(ns)
-
-    // Otherwise we generate A LOT of noise :)
     ns.disableLog('ALL')
 
+    ns.print("INFO Loading cluster...")
     while (true) {
-        ns.print("INFO Entering main loop...")
+        const cluster = Cluster.fromFile(ns, '/cluster.json.txt')
+        ns.printf("INFO Loaded cluster with %d servers", cluster.servers.length)
 
-        ns.print("INFO Scanning the network for servers...")
-        let servers = scanAllServers(ns).all()
-        ns.printf("INFO Found %d servers", servers.length)
-
-        const invalidServers = servers.filter(svr => !svr.isPurchasedServer() && !svr.canHack(player))
-        ns.printf(
-            "INFO Removing %d servers from processing as they currently cannot be hacked",
-            invalidServers.length
-        )
-        servers = servers.filter(svr => !invalidServers.includes(svr))
-
-        servers.forEach((server, index) => {
-            ns.printf("INFO Processing '%s' (%d/%d)", server.name, index + 1, servers.length)
+        cluster.servers.forEach((server, index) => {
+            ns.printf("INFO Processing '%s' (%d/%d)", server.name, index + 1, cluster.servers.length)
 
             if (!server.isPurchasedServer() && !server.isRooted()) {
                 ns.print("WARN This server has not yet been rooted. Rooting...")
