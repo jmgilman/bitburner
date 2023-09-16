@@ -11,11 +11,11 @@ export async function main(ns: NS): Promise<void> {
 
     ns.print("INFO Entering main scanning loop...")
     while (true) {
-        let allServers = scanAllServers(ns).all()
+        let allServers = scanAllServers(ns).all(true)
         ns.printf("INFO Found %d servers", allServers.length)
 
         const servers = allServers
-            .filter(svr => svr.isPurchasedServer() ? true : svr.canHack(player))
+            .filter(svr => svr.isPurchasedServer() || svr.name === "home" ? true : svr.canHack(player))
             .filter(svr => svr.getMaxRAM() > 0)
 
         ns.printf("INFO Processing %d valid servers", servers.length)
