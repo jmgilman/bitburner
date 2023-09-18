@@ -33,10 +33,11 @@ export class Script {
 
     /**
      * Returns the total RAM required by this script
+     * @param threads The number of threads to use
      * @return The total RAM required
      */
-    getRAM(): number {
-        return this.ns.getScriptRam(this.filename, this.hostname)
+    getRAM(threads: number = 1): number {
+        return this.ns.getScriptRam(this.filename, this.hostname) * threads
     }
 
 }

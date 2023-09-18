@@ -125,10 +125,30 @@ export class Server {
     }
 
     /**
+     * Calculates the security increase from growing this server with the given
+     * number of threads.
+     * @param threads The number of threads used for growing
+     * @returns The security increase from growing
+     */
+    getGrowthSecurityIncrease(threads: number): number {
+        return this.ns.growthAnalyzeSecurity(threads)
+    }
+
+    /**
+     * Calculates the number of threads required to grow this server with the
+     * given amount of money.
+     * @param amount The amount of money to grow
+     * @returns The number of threads required to grow this server
+     */
+    getGrowthThreads(percent: number): number {
+        return Math.ceil(this.ns.growthAnalyze(this.name, 1 + percent))
+    }
+
+    /**
      * Calculates the number of threads required to grow this server to max.
      * @returns The number of threads required to grow this server to max
      */
-    getGrowthThreads(): number {
+    getGrowthThreadsMax(): number {
         return Math.ceil(this.ns.growthAnalyze(this.name, this.getMaxMoney() / this.getCurrentMoney()))
     }
 
@@ -149,12 +169,23 @@ export class Server {
     }
 
     /**
-     * Calculates the number of threads required to hack this server.
-     * @param money The amount of money to hack
+     * Calculates the security increase from hacking this server with the given
+     * number of threads.
+     * @param threads The number of threads used for hacking
+     * @returns The security increase from hacking
+     */
+    getHackSecurityIncrease(threads: number): number {
+        return this.ns.hackAnalyzeSecurity(threads, this.name)
+    }
+
+    /**
+     * Calculates the number of threads required to hack the given percentage of
+     * money from this server.
+     * @param percent The percentage of money to hack
      * @returns The number of threads required to hack this server
      */
-    getHackThreads(money: number): number {
-        return Math.ceil(this.ns.hackAnalyzeThreads(this.name, money))
+    getHackThreads(percent: number): number {
+        return Math.floor(this.ns.hackAnalyzeThreads(this.name, this.getCurrentMoney() * percent))
     }
 
     /**

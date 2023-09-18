@@ -4,7 +4,7 @@ import { Server } from "lib/server"
 import { Script } from "lib/script"
 
 export async function growthAttack(ns: NS, growScript: Script, weakenScript: Script, target: Server, cluster: Cluster) {
-    let remainingThreads = target.getGrowthThreads()
+    let remainingThreads = target.getGrowthThreadsMax()
     let growSecRatio = ns.growthAnalyzeSecurity(1) / ns.weakenAnalyze(1)
 
     while (remainingThreads > 0) {
